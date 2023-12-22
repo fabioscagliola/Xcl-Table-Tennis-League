@@ -1,0 +1,21 @@
+volumes:
+  volume_database:
+
+
+networks:
+  network_xttl:
+
+
+services:
+
+  database:
+    container_name: xttl-database
+    image: mysql
+    env_file:
+      - ./.env
+    volumes:
+      - volume_database:/var/lib/mysql
+    networks:
+      - network_xttl
+    ports:
+      - "65535:3306"
