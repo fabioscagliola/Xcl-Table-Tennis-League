@@ -2,13 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\PlayerRepository;
+use App\Repository\LeagueRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: PlayerRepository::class)]
-class Player
+#[ORM\Entity(repositoryClass: LeagueRepository::class)]
+class League
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -18,16 +18,16 @@ class Player
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\OneToMany(mappedBy: 'p1Id', targetEntity: Game::class, orphanRemoval: true)]  // TODO: p2Id
+    #[ORM\OneToMany(mappedBy: 'league', targetEntity: Game::class)]
     private Collection $gameList;
 
-    #[ORM\ManyToMany(targetEntity: League::class, inversedBy: 'playerList')]
-    private Collection $leagueList;
+    #[ORM\ManyToMany(targetEntity: Player::class, mappedBy: 'leagueList')]
+    private Collection $playerList;
 
     public function __construct()
     {
         $this->gameList = new ArrayCollection();
-        $this->leagueList = new ArrayCollection();
+        $this->playerList = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -55,21 +55,11 @@ class Player
         return $this->gameList;
     }
 
-    public function addGameToP1(Game $game): static
+    public function addGame(Game $game): static
     {
         if (!$this->gameList->contains($game)) {
             $this->gameList->add($game);
-            $game->setP1Id($this);
-        }
-
-        return $this;
-    }
-
-    public function addGameToP2(Game $game): static
-    {
-        if (!$this->gameList->contains($game)) {
-            $this->gameList->add($game);
-            $game->setP2Id($this);
+            $game->setLeague($this);
         }
 
         return $this;
@@ -79,10 +69,8 @@ class Player
     {
         if ($this->gameList->removeElement($game)) {
             // set the owning side to null (unless already changed)
-            if ($game->getP1Id() === $this) {
-                $game->setP1Id(null);
-            } elseif ($game->getP2Id() === $this) {
-                $game->setP2Id(null);
+            if ($game->getLeague() === $this) {
+                $game->setLeague(null);
             }
         }
 
@@ -90,25 +78,28 @@ class Player
     }
 
     /**
-     * @return Collection<int, League>
+     * @return Collection<int, Player>
      */
-    public function getLeagueList(): Collection
+    public function getPlayerList(): Collection
     {
-        return $this->leagueList;
+        return $this->playerList;
     }
 
-    public function addLeague(League $league): static
+    public function addPlayer(Player $player): static
     {
-        if (!$this->leagueList->contains($league)) {
-            $this->leagueList->add($league);
+        if (!$this->playerList->contains($player)) {
+            $this->playerList->add($player);
+            $player->addLeague($this);
         }
 
         return $this;
     }
 
-    public function removeLeague(League $league): static
+    public function removePlayer(Player $player): static
     {
-        $this->leagueList->removeElement($league);
+        if ($this->playerList->removeElement($player)) {
+            $player->removeLeague($this);
+        }
 
         return $this;
     }

@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\GameRepository;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -14,8 +15,11 @@ class Game
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\ManyToOne(inversedBy: 'gameList')]
+    private ?League $league = null;
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $date = null;
+    private ?DateTimeInterface $date = null;
 
     #[ORM\ManyToOne(inversedBy: 'gameList')]
     #[ORM\JoinColumn(nullable: false)]
@@ -40,12 +44,24 @@ class Game
         return $this->id;
     }
 
-    public function getDate(): ?\DateTimeInterface
+    public function getLeague(): ?League
+    {
+        return $this->league;
+    }
+
+    public function setLeague(?League $league): static
+    {
+        $this->league = $league;
+
+        return $this;
+    }
+
+    public function getDate(): ?DateTimeInterface
     {
         return $this->date;
     }
 
-    public function setDate(\DateTimeInterface $date): static
+    public function setDate(DateTimeInterface $date): static
     {
         $this->date = $date;
 
