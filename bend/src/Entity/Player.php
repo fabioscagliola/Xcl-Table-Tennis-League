@@ -2,9 +2,11 @@
 
 namespace App\Entity;
 
+use App\DataTransferObject\PlayerData;
 use App\Repository\PlayerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PlayerRepository::class)]
@@ -18,10 +20,10 @@ class Player
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\OneToMany(mappedBy: 'p1Id', targetEntity: Game::class, orphanRemoval: true)]  // TODO: p2Id
+    #[ORM\ManyToMany(targetEntity: Game::class, inversedBy: 'playerList')]
     private Collection $gameList;
 
-    #[ORM\ManyToMany(targetEntity: League::class, inversedBy: 'playerList')]
+    #[ORM\ManyToMany(targetEntity: League::class, mappedBy: 'playerList')]
     private Collection $leagueList;
 
     public function __construct()
@@ -55,21 +57,10 @@ class Player
         return $this->gameList;
     }
 
-    public function addGameToP1(Game $game): static
+    public function addGame(Game $game): static
     {
         if (!$this->gameList->contains($game)) {
             $this->gameList->add($game);
-            $game->setP1Id($this);
-        }
-
-        return $this;
-    }
-
-    public function addGameToP2(Game $game): static
-    {
-        if (!$this->gameList->contains($game)) {
-            $this->gameList->add($game);
-            $game->setP2Id($this);
         }
 
         return $this;
@@ -77,14 +68,7 @@ class Player
 
     public function removeGame(Game $game): static
     {
-        if ($this->gameList->removeElement($game)) {
-            // set the owning side to null (unless already changed)
-            if ($game->getP1Id() === $this) {
-                $game->setP1Id(null);
-            } elseif ($game->getP2Id() === $this) {
-                $game->setP2Id(null);
-            }
-        }
+        $this->gameList->removeElement($game);
 
         return $this;
     }
@@ -101,6 +85,7 @@ class Player
     {
         if (!$this->leagueList->contains($league)) {
             $this->leagueList->add($league);
+            $league->addPlayer($this);
         }
 
         return $this;
@@ -108,8 +93,15 @@ class Player
 
     public function removeLeague(League $league): static
     {
-        $this->leagueList->removeElement($league);
+        if ($this->leagueList->removeElement($league)) {
+            $league->removePlayer($this);
+        }
 
         return $this;
+    }
+
+    public function initFromData(EntityManagerInterface $entityManager, PlayerData $data): void
+    {
+        $this->setName($data->name);
     }
 }

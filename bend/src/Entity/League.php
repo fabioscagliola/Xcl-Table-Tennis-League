@@ -2,9 +2,11 @@
 
 namespace App\Entity;
 
+use App\DataTransferObject\LeagueData;
 use App\Repository\LeagueRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: LeagueRepository::class)]
@@ -21,7 +23,7 @@ class League
     #[ORM\OneToMany(mappedBy: 'league', targetEntity: Game::class)]
     private Collection $gameList;
 
-    #[ORM\ManyToMany(targetEntity: Player::class, mappedBy: 'leagueList')]
+    #[ORM\ManyToMany(targetEntity: Player::class, inversedBy: 'leagueList')]
     private Collection $playerList;
 
     public function __construct()
@@ -89,7 +91,6 @@ class League
     {
         if (!$this->playerList->contains($player)) {
             $this->playerList->add($player);
-            $player->addLeague($this);
         }
 
         return $this;
@@ -97,10 +98,13 @@ class League
 
     public function removePlayer(Player $player): static
     {
-        if ($this->playerList->removeElement($player)) {
-            $player->removeLeague($this);
-        }
+        $this->playerList->removeElement($player);
 
         return $this;
+    }
+
+    public function initFromData(EntityManagerInterface $entityManager, LeagueData $data): void
+    {
+        $this->setName($data->name);
     }
 }
