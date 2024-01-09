@@ -8,7 +8,7 @@ use Exception;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
-class PlayerControllerTest
+class PlayerControllerTest extends ControllerTest
 {
     static string $routeUrl = '/players';
 
@@ -18,11 +18,7 @@ class PlayerControllerTest
      */
     public function GivenEmptyName_WhenCreatingPlayer_ThenBadRequest(): void
     {
-        $data = new PlayerData(
-            'player-1',
-            '',
-            'http://127.0.0.1:8000/RetrieveContextSucceeds',
-            'http://127.0.0.1:8000/ProcessReviewResultSucceeds');
+        $data = new PlayerData('');
         static::performRequest(static::$routeUrl, 'POST', $data, Response::HTTP_BAD_REQUEST);
     }
 
@@ -100,11 +96,7 @@ class PlayerControllerTest
     {
         $data = static::CreatePlayerData();
         $existing = static::CreatePlayer($data);
-        $data = new PlayerData(
-            'player-2',
-            'Player 2',
-            'http://127.0.0.1:8000/RetrieveContextFails',
-            'http://127.0.0.1:8000/ProcessReviewResultFails');
+        $data = new PlayerData('Laura');
         $expected = new Player();
         $expected->initFromData(static::$entityManager, $data);
         $response = static::performRequest(static::$routeUrl . '/' . $existing->getId(), 'PUT', $data, Response::HTTP_OK);
@@ -138,7 +130,6 @@ class PlayerControllerTest
     {
         static::assertNotNull($expected);
         static::assertNotNull($actual);
-        static::assertEquals($expected->getCode(), $actual->getCode());
         static::assertEquals($expected->getName(), $actual->getName());
     }
 }

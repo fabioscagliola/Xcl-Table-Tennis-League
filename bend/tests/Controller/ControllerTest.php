@@ -4,6 +4,8 @@ namespace App\Tests\Controller;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use ApiPlatform\Symfony\Bundle\Test\Client;
+use App\DataTransferObject\PlayerData;
+use App\Entity\Player;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\HttpFoundation\Response;
@@ -57,19 +59,15 @@ abstract class ControllerTest extends ApiTestCase
         return $response;
     }
 
-    static function CreateTenantData(): TenantData
+    static function CreatePlayerData(): PlayerData
     {
-        return new TenantData(
-            'tenant-1',
-            'Tenant 1',
-            'http://127.0.0.1:8000/RetrieveContextSucceeds',
-            'http://127.0.0.1:8000/ProcessReviewResultSucceeds');
+        return new PlayerData('Fabio');
     }
 
-    static function CreateTenant(TenantData $tenantData): Tenant
+    static function CreatePlayer(PlayerData $playerData): Player
     {
-        $response = static::performRequest('/tenants', 'POST', $tenantData, Response::HTTP_CREATED);
-        $response = static::performRequest('/tenants/' . $response->toArray()['id'], 'GET', null, Response::HTTP_OK);
-        return static::$serializer->deserialize($response->getContent(), Tenant::class, 'json');
+        $response = static::performRequest('/players', 'POST', $playerData, Response::HTTP_CREATED);
+        $response = static::performRequest('/players/' . $response->toArray()['id'], 'GET', null, Response::HTTP_OK);
+        return static::$serializer->deserialize($response->getContent(), Player::class, 'json');
     }
 }
