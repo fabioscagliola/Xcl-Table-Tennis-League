@@ -2,8 +2,8 @@
 
 namespace App\Tests\Controller;
 
-use App\DataTransferObject\PlayerData;
-use App\Entity\Player;
+use App\DataTransferObject\LeagueData;
+use App\Entity\League;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
@@ -11,17 +11,17 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
-class PlayerControllerTest extends ControllerTest
+class LeagueControllerTest extends ControllerTest
 {
-    private static string $routeUrl = '/players';
+    private static string $routeUrl = '/leagues';
 
     /**
      * @test
      * @throws TransportExceptionInterface
      */
-    public function GivenEmptyName_WhenCreatingPlayer_ThenBadRequest(): void
+    public function GivenEmptyName_WhenCreatingLeague_ThenBadRequest(): void
     {
-        $data = new PlayerData('');
+        $data = new LeagueData('');
         static::performRequest(static::$routeUrl, 'POST', $data, Response::HTTP_BAD_REQUEST);
     }
 
@@ -33,12 +33,12 @@ class PlayerControllerTest extends ControllerTest
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function GivenValidRequest_WhenCreatingPlayer_ThenOk(): void
+    public function GivenValidRequest_WhenCreatingLeague_ThenOk(): void
     {
-        $data = static::CreatePlayerData();
-        $expected = new Player();
+        $data = static::CreateLeagueData();
+        $expected = new League();
         $expected->initFromData(static::$entityManager, $data);
-        $actual = static::CreatePlayer($data);
+        $actual = static::CreateLeague($data);
         static::assertGreaterThan(0, $actual->getId());
         static::makeAssertions($expected, $actual);
     }
@@ -47,7 +47,7 @@ class PlayerControllerTest extends ControllerTest
      * @test
      * @throws TransportExceptionInterface
      */
-    public function GivenInvalidIdentifier_WhenReadingPlayer_ThenNotFound(): void
+    public function GivenInvalidIdentifier_WhenReadingLeague_ThenNotFound(): void
     {
         static::performRequest(static::$routeUrl . '/0', 'GET', null, Response::HTTP_NOT_FOUND);
     }
@@ -60,12 +60,12 @@ class PlayerControllerTest extends ControllerTest
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function GivenValidIdentifier_WhenReadingPlayer_ThenOk(): void
+    public function GivenValidIdentifier_WhenReadingLeague_ThenOk(): void
     {
-        $data = static::CreatePlayerData();
-        $expected = static::CreatePlayer($data);
+        $data = static::CreateLeagueData();
+        $expected = static::CreateLeague($data);
         $response = static::performRequest(static::$routeUrl . '/' . $expected->getId(), 'GET', null, Response::HTTP_OK);
-        $actual = static::$serializer->deserialize($response->getContent(), Player::class, 'json');
+        $actual = static::$serializer->deserialize($response->getContent(), League::class, 'json');
         static::assertEquals($expected->getId(), $actual->getId());
         static::makeAssertions($expected, $actual);
     }
@@ -78,12 +78,12 @@ class PlayerControllerTest extends ControllerTest
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function GivenExistingPlayers_WhenReadingPlayerList_ThenOk(): void
+    public function GivenExistingLeagues_WhenReadingLeagueList_ThenOk(): void
     {
-        $data = static::CreatePlayerData();
-        $expected = static::CreatePlayer($data);
+        $data = static::CreateLeagueData();
+        $expected = static::CreateLeague($data);
         $response = static::performRequest(static::$routeUrl, 'GET', null, Response::HTTP_OK);
-        $actualList = static::$serializer->deserialize($response->getContent(), Player::class . '[]', 'json');
+        $actualList = static::$serializer->deserialize($response->getContent(), League::class . '[]', 'json');
         static::assertGreaterThan(0, count($actualList));
         $actual = $actualList[count($actualList) - 1];
         static::assertEquals($expected->getId(), $actual->getId());
@@ -94,9 +94,9 @@ class PlayerControllerTest extends ControllerTest
      * @test
      * @throws TransportExceptionInterface
      */
-    public function GivenNonExistingPlayer_WhenUpdatingPlayer_ThenNotFound(): void
+    public function GivenNonExistingLeague_WhenUpdatingLeague_ThenNotFound(): void
     {
-        $data = static::CreatePlayerData();
+        $data = static::CreateLeagueData();
         static::performRequest(static::$routeUrl . '/0', 'PUT', $data, Response::HTTP_NOT_FOUND);
     }
 
@@ -108,15 +108,15 @@ class PlayerControllerTest extends ControllerTest
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function GivenExistingPlayer_WhenUpdatingPlayer_ThenOk(): void
+    public function GivenExistingLeague_WhenUpdatingLeague_ThenOk(): void
     {
-        $data = static::CreatePlayerData();
-        $existing = static::CreatePlayer($data);
-        $data = new PlayerData('Laura');
-        $expected = new Player();
+        $data = static::CreateLeagueData();
+        $existing = static::CreateLeague($data);
+        $data = new LeagueData('Laura');
+        $expected = new League();
         $expected->initFromData(static::$entityManager, $data);
         $response = static::performRequest(static::$routeUrl . '/' . $existing->getId(), 'PUT', $data, Response::HTTP_OK);
-        $actual = static::$serializer->deserialize($response->getContent(), Player::class, 'json');
+        $actual = static::$serializer->deserialize($response->getContent(), League::class, 'json');
         static::assertEquals($existing->getId(), $actual->getId());
         static::makeAssertions($expected, $actual);
     }
@@ -125,7 +125,7 @@ class PlayerControllerTest extends ControllerTest
      * @test
      * @throws TransportExceptionInterface
      */
-    public function GivenNonExistingPlayer_WhenDeletingPlayer_ThenNotFound(): void
+    public function GivenNonExistingLeague_WhenDeletingLeague_ThenNotFound(): void
     {
         static::performRequest(static::$routeUrl . '/0', 'DELETE', null, Response::HTTP_NOT_FOUND);
     }
@@ -138,15 +138,15 @@ class PlayerControllerTest extends ControllerTest
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function GivenExistingPlayer_WhenDeletingPlayer_ThenOk(): void
+    public function GivenExistingLeague_WhenDeletingLeague_ThenOk(): void
     {
-        $data = static::CreatePlayerData();
-        $existing = static::CreatePlayer($data);
+        $data = static::CreateLeagueData();
+        $existing = static::CreateLeague($data);
         static::performRequest(static::$routeUrl . '/' . $existing->getId(), 'DELETE', null, Response::HTTP_NO_CONTENT);
         static::performRequest(static::$routeUrl . '/' . $existing->getId(), 'GET', null, Response::HTTP_NOT_FOUND);
     }
 
-    private static function makeAssertions(Player $expected, Player $actual): void
+    private static function makeAssertions(League $expected, League $actual): void
     {
         static::assertNotNull($expected);
         static::assertNotNull($actual);

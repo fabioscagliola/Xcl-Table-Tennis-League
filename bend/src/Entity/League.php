@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection PhpUnused */
+
 namespace App\Entity;
 
 use App\DataTransferObject\LeagueData;
@@ -37,6 +39,13 @@ class League
         return $this->id;
     }
 
+    public function setId(int $id): static
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
     public function getName(): ?string
     {
         return $this->name;
@@ -69,11 +78,8 @@ class League
 
     public function removeGame(Game $game): static
     {
-        if ($this->gameList->removeElement($game)) {
-            // set the owning side to null (unless already changed)
-            if ($game->getLeague() === $this) {
-                $game->setLeague(null);
-            }
+        if ($this->gameList->removeElement($game) && $game->getLeague() === $this) {
+            $game->setLeague(null);
         }
 
         return $this;

@@ -29,11 +29,11 @@ class GameController extends AbstractController
         try {
             $game->initFromData($entityManager, $gameData);
         } catch (Exception $e) {
-            return static::json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
         $entityManager->persist($game);
         $entityManager->flush();
-        return static::json($game, Response::HTTP_CREATED);
+        return $this->json($game, Response::HTTP_CREATED);
     }
 
     /**
@@ -48,9 +48,10 @@ class GameController extends AbstractController
     {
         $repository = $entityManager->getRepository(Game::class);
         $game = $repository->find($id);
-        if ($game == null)
-            return static::json(null, Response::HTTP_NOT_FOUND);
-        return static::json($game);
+        if ($game === null) {
+            return $this->json(null, Response::HTTP_NOT_FOUND);
+        }
+        return $this->json($game, Response::HTTP_OK);
     }
 
     /**
@@ -64,7 +65,7 @@ class GameController extends AbstractController
     {
         $repository = $entityManager->getRepository(Game::class);
         $gameList = $repository->findAll();
-        return static::json($gameList, Response::HTTP_OK);
+        return $this->json($gameList, Response::HTTP_OK);
     }
 
     /**
@@ -81,16 +82,17 @@ class GameController extends AbstractController
     {
         $repository = $entityManager->getRepository(Game::class);
         $game = $repository->find($id);
-        if ($game == null)
-            return static::json(null, Response::HTTP_NOT_FOUND);
+        if ($game === null) {
+            return $this->json(null, Response::HTTP_NOT_FOUND);
+        }
         try {
             $game->initFromData($entityManager, $gameData);
         } catch (Exception $e) {
-            return static::json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
         $entityManager->persist($game);
         $entityManager->flush();
-        return static::json($game, Response::HTTP_OK);
+        return $this->json($game, Response::HTTP_OK);
     }
 
     /**
@@ -105,10 +107,11 @@ class GameController extends AbstractController
     {
         $repository = $entityManager->getRepository(Game::class);
         $game = $repository->find($id);
-        if ($game == null)
-            return static::json(null, Response::HTTP_NOT_FOUND);
+        if ($game === null) {
+            return $this->json(null, Response::HTTP_NOT_FOUND);
+        }
         $entityManager->remove($game);
         $entityManager->flush();
-        return static::json(null, Response::HTTP_NO_CONTENT);
+        return $this->json(null, Response::HTTP_NO_CONTENT);
     }
 }

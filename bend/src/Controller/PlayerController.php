@@ -29,11 +29,11 @@ class PlayerController extends AbstractController
         try {
             $player->initFromData($entityManager, $playerData);
         } catch (Exception $e) {
-            return static::json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
         $entityManager->persist($player);
         $entityManager->flush();
-        return static::json($player, Response::HTTP_CREATED);
+        return $this->json($player, Response::HTTP_CREATED);
     }
 
     /**
@@ -48,9 +48,10 @@ class PlayerController extends AbstractController
     {
         $repository = $entityManager->getRepository(Player::class);
         $player = $repository->find($id);
-        if ($player == null)
-            return static::json(null, Response::HTTP_NOT_FOUND);
-        return static::json($player);
+        if ($player === null) {
+            return $this->json(null, Response::HTTP_NOT_FOUND);
+        }
+        return $this->json($player, Response::HTTP_OK);
     }
 
     /**
@@ -64,7 +65,7 @@ class PlayerController extends AbstractController
     {
         $repository = $entityManager->getRepository(Player::class);
         $playerList = $repository->findAll();
-        return static::json($playerList, Response::HTTP_OK);
+        return $this->json($playerList, Response::HTTP_OK);
     }
 
     /**
@@ -81,16 +82,17 @@ class PlayerController extends AbstractController
     {
         $repository = $entityManager->getRepository(Player::class);
         $player = $repository->find($id);
-        if ($player == null)
-            return static::json(null, Response::HTTP_NOT_FOUND);
+        if ($player === null) {
+            return $this->json(null, Response::HTTP_NOT_FOUND);
+        }
         try {
             $player->initFromData($entityManager, $playerData);
         } catch (Exception $e) {
-            return static::json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
         $entityManager->persist($player);
         $entityManager->flush();
-        return static::json($player, Response::HTTP_OK);
+        return $this->json($player, Response::HTTP_OK);
     }
 
     /**
@@ -105,10 +107,11 @@ class PlayerController extends AbstractController
     {
         $repository = $entityManager->getRepository(Player::class);
         $player = $repository->find($id);
-        if ($player == null)
-            return static::json(null, Response::HTTP_NOT_FOUND);
+        if ($player === null) {
+            return $this->json(null, Response::HTTP_NOT_FOUND);
+        }
         $entityManager->remove($player);
         $entityManager->flush();
-        return static::json(null, Response::HTTP_NO_CONTENT);
+        return $this->json(null, Response::HTTP_NO_CONTENT);
     }
 }

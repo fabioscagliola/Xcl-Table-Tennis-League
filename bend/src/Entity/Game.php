@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection PhpUnused */
+
 namespace App\Entity;
 
 use App\DataTransferObject\GameData;
@@ -11,7 +13,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping as ORM;
-use Exception;
+use RuntimeException;
 
 #[ORM\Entity(repositoryClass: GameRepository::class)]
 class Game
@@ -22,7 +24,7 @@ class Game
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $date = null;
+    private ?DateTimeInterface $date = null;
 
     #[ORM\Column]
     private ?int $winnerId = null;
@@ -50,12 +52,19 @@ class Game
         return $this->id;
     }
 
-    public function getDate(): ?\DateTimeInterface
+    public function setId(int $id): static
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    public function getDate(): ?DateTimeInterface
     {
         return $this->date;
     }
 
-    public function setDate(\DateTimeInterface $date): static
+    public function setDate(DateTimeInterface $date): static
     {
         $this->date = $date;
 
@@ -138,14 +147,15 @@ class Game
     }
 
     /**
-     * @throws Exception
+     * @throws RuntimeException
      */
-    public function initFromData(EntityManagerInterface $entityManager, GameData $data) : void
+    public function initFromData(EntityManagerInterface $entityManager, GameData $data): void
     {
         $repository = $entityManager->getRepository(League::class);
         $league = $repository->find($data->leagueId);
-        if ($league === null)
-            throw new Exception('Invalid league identifier!');
+        if ($league === null) {
+            throw new RuntimeException('Invalid league identifier!');
+        }
         $this->setLeague($league);
         $this->setDate(DateTime::createFromFormat(DateTimeInterface::ATOM, $data->date));
         $this->setWinnerId($data->winnerId);

@@ -29,11 +29,11 @@ class LeagueController extends AbstractController
         try {
             $league->initFromData($entityManager, $leagueData);
         } catch (Exception $e) {
-            return static::json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
         $entityManager->persist($league);
         $entityManager->flush();
-        return static::json($league, Response::HTTP_CREATED);
+        return $this->json($league, Response::HTTP_CREATED);
     }
 
     /**
@@ -48,9 +48,10 @@ class LeagueController extends AbstractController
     {
         $repository = $entityManager->getRepository(League::class);
         $league = $repository->find($id);
-        if ($league == null)
-            return static::json(null, Response::HTTP_NOT_FOUND);
-        return static::json($league);
+        if ($league === null) {
+            return $this->json(null, Response::HTTP_NOT_FOUND);
+        }
+        return $this->json($league, Response::HTTP_OK);
     }
 
     /**
@@ -64,7 +65,7 @@ class LeagueController extends AbstractController
     {
         $repository = $entityManager->getRepository(League::class);
         $leagueList = $repository->findAll();
-        return static::json($leagueList, Response::HTTP_OK);
+        return $this->json($leagueList, Response::HTTP_OK);
     }
 
     /**
@@ -81,16 +82,17 @@ class LeagueController extends AbstractController
     {
         $repository = $entityManager->getRepository(League::class);
         $league = $repository->find($id);
-        if ($league == null)
-            return static::json(null, Response::HTTP_NOT_FOUND);
+        if ($league === null) {
+            return $this->json(null, Response::HTTP_NOT_FOUND);
+        }
         try {
             $league->initFromData($entityManager, $leagueData);
         } catch (Exception $e) {
-            return static::json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
         $entityManager->persist($league);
         $entityManager->flush();
-        return static::json($league, Response::HTTP_OK);
+        return $this->json($league, Response::HTTP_OK);
     }
 
     /**
@@ -105,10 +107,11 @@ class LeagueController extends AbstractController
     {
         $repository = $entityManager->getRepository(League::class);
         $league = $repository->find($id);
-        if ($league == null)
-            return static::json(null, Response::HTTP_NOT_FOUND);
+        if ($league === null) {
+            return $this->json(null, Response::HTTP_NOT_FOUND);
+        }
         $entityManager->remove($league);
         $entityManager->flush();
-        return static::json(null, Response::HTTP_NO_CONTENT);
+        return $this->json(null, Response::HTTP_NO_CONTENT);
     }
 }
