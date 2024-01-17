@@ -4,10 +4,14 @@ namespace App\Tests\Controller;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use ApiPlatform\Symfony\Bundle\Test\Client;
+use App\DataTransferObject\GameData;
 use App\DataTransferObject\LeagueData;
 use App\DataTransferObject\PlayerData;
+use App\Entity\Game;
 use App\Entity\League;
 use App\Entity\Player;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
@@ -42,8 +46,13 @@ abstract class ControllerTest extends ApiTestCase
      * @throws TransportExceptionInterface
      * @throws RuntimeException
      */
-    public static function performRequest(string $routeUrl, string $method, ?object $body, int $expectedStatusCode, string $bearer = null): ResponseInterface
-    {
+    public static function performRequest(
+        string $routeUrl,
+        string $method,
+        ?object $body,
+        int $expectedStatusCode,
+        string $bearer = null
+    ): ResponseInterface {
         $headerList = [];
 
         if ($bearer !== null) {
@@ -51,11 +60,15 @@ abstract class ControllerTest extends ApiTestCase
         }
 
         if ($method === 'POST' || $method === 'PUT') {
-            if ($body === null) {
-                throw new RuntimeException('You must specify a body for POST and PUT requests!');
-            }
+            //if ($body === null) {
+            //    throw new RuntimeException('You must specify a body for POST and PUT requests!');
+            //}
             $headerList['Content-Type'] = 'application/json';
-            $response = static::$client->request($method, $routeUrl, ['body' => static::$serializer->serialize($body, 'json'), 'headers' => $headerList]);
+            $response = static::$client->request(
+                $method,
+                $routeUrl,
+                ['body' => static::$serializer->serialize($body, 'json'), 'headers' => $headerList]
+            );
         } else {
             $response = static::$client->request($method, $routeUrl, ['headers' => $headerList]);
         }
@@ -65,9 +78,45 @@ abstract class ControllerTest extends ApiTestCase
         return $response;
     }
 
+    /**
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     */
+    protected static function CreateGameData(): GameData
+    {
+        $leagueData = static::CreateLeagueData();
+        $league = static::CreateLeague($leagueData);
+        $playerData = static::CreatePlayerData();
+        $player = static::CreatePlayer($playerData);
+        return new GameData(
+            $league->getId(),
+            (new DateTime())->format(DateTimeInterface::ATOM),
+            $player->getId(),
+            $player->getName(),
+            '2-0'
+        );
+    }
+
+    /**
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     */
+    protected static function CreateGame(GameData $gameData): Game
+    {
+        $response = static::performRequest('/games', 'POST', $gameData, Response::HTTP_CREATED);
+        $response = static::performRequest('/games/' . $response->toArray()['id'], 'GET', null, Response::HTTP_OK);
+        return static::$serializer->deserialize($response->getContent(), Game::class, 'json');
+    }
+
     protected static function CreateLeagueData(): LeagueData
     {
-        return new LeagueData('Fabio');
+        return new LeagueData('Major');
     }
 
     /**
@@ -83,6 +132,7 @@ abstract class ControllerTest extends ApiTestCase
         $response = static::performRequest('/leagues/' . $response->toArray()['id'], 'GET', null, Response::HTTP_OK);
         return static::$serializer->deserialize($response->getContent(), League::class, 'json');
     }
+
     protected static function CreatePlayerData(): PlayerData
     {
         return new PlayerData('Fabio');

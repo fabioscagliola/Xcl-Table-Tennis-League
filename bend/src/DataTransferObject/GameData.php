@@ -19,7 +19,6 @@ class GameData
         public string $winnerName,
         #[Constraints\NotBlank(message: 'You must indicate the result!')]
         public string $result,
-    )
-    {
+    ) {
     }
 }

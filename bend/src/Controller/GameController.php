@@ -22,9 +22,10 @@ class GameController extends AbstractController
      * @return JsonResponse
      */
     #[Route('/games', methods: ['POST'], format: 'json')]
-    public function Create(EntityManagerInterface $entityManager,
-        #[MapRequestPayload(acceptFormat: 'json', validationFailedStatusCode: Response::HTTP_BAD_REQUEST)] GameData $gameData): JsonResponse
-    {
+    public function Create(
+        EntityManagerInterface $entityManager,
+        #[MapRequestPayload(acceptFormat: 'json', validationFailedStatusCode: Response::HTTP_BAD_REQUEST)] GameData $gameData
+    ): JsonResponse {
         $game = new Game();
         try {
             $game->initFromData($entityManager, $gameData);
@@ -77,9 +78,11 @@ class GameController extends AbstractController
      * @return JsonResponse
      */
     #[Route('/games/{id}', methods: ['PUT'], format: 'json')]
-    public function Update(EntityManagerInterface $entityManager, int $id,
-        #[MapRequestPayload(acceptFormat: 'json', validationFailedStatusCode: Response::HTTP_BAD_REQUEST)] GameData $gameData): JsonResponse
-    {
+    public function Update(
+        EntityManagerInterface $entityManager,
+        int $id,
+        #[MapRequestPayload(acceptFormat: 'json', validationFailedStatusCode: Response::HTTP_BAD_REQUEST)] GameData $gameData
+    ): JsonResponse {
         $repository = $entityManager->getRepository(Game::class);
         $game = $repository->find($id);
         if ($game === null) {

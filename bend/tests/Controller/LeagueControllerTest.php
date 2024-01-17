@@ -64,7 +64,12 @@ class LeagueControllerTest extends ControllerTest
     {
         $data = static::CreateLeagueData();
         $expected = static::CreateLeague($data);
-        $response = static::performRequest(static::$routeUrl . '/' . $expected->getId(), 'GET', null, Response::HTTP_OK);
+        $response = static::performRequest(
+            static::$routeUrl . '/' . $expected->getId(),
+            'GET',
+            null,
+            Response::HTTP_OK
+        );
         $actual = static::$serializer->deserialize($response->getContent(), League::class, 'json');
         static::assertEquals($expected->getId(), $actual->getId());
         static::makeAssertions($expected, $actual);
@@ -112,10 +117,15 @@ class LeagueControllerTest extends ControllerTest
     {
         $data = static::CreateLeagueData();
         $existing = static::CreateLeague($data);
-        $data = new LeagueData('Laura');
+        $data = new LeagueData('Minor');
         $expected = new League();
         $expected->initFromData(static::$entityManager, $data);
-        $response = static::performRequest(static::$routeUrl . '/' . $existing->getId(), 'PUT', $data, Response::HTTP_OK);
+        $response = static::performRequest(
+            static::$routeUrl . '/' . $existing->getId(),
+            'PUT',
+            $data,
+            Response::HTTP_OK
+        );
         $actual = static::$serializer->deserialize($response->getContent(), League::class, 'json');
         static::assertEquals($existing->getId(), $actual->getId());
         static::makeAssertions($expected, $actual);
@@ -144,6 +154,41 @@ class LeagueControllerTest extends ControllerTest
         $existing = static::CreateLeague($data);
         static::performRequest(static::$routeUrl . '/' . $existing->getId(), 'DELETE', null, Response::HTTP_NO_CONTENT);
         static::performRequest(static::$routeUrl . '/' . $existing->getId(), 'GET', null, Response::HTTP_NOT_FOUND);
+    }
+
+    // TODO: GivenNonExistingLeague_WhenAssigningPlayer_ThenBadRequest
+    // TODO: GivenNonExistingPlayer_WhenAssigningPlayer_ThenBadRequest
+
+    /**
+     * @test
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     */
+    public function GivenExistingLeague_WhenAssigningPlayer_ThenOk(): void
+    {
+        $playerData = static::CreatePlayerData();
+        $player = static::CreatePlayer($playerData);
+        $data = static::CreateLeagueData();
+        $expected = static::CreateLeague($data);
+        static::performRequest(
+            static::$routeUrl . '/' . $expected->getId() . '/players/' . $player->getId(),
+            'PUT',
+            null,
+            Response::HTTP_NO_CONTENT
+        );
+        $response = static::performRequest(
+            static::$routeUrl . '/' . $expected->getId(),
+            'GET',
+            null,
+            Response::HTTP_OK
+        );
+        $actual = static::$serializer->deserialize($response->getContent(), League::class, 'json');
+        static::assertEquals($expected->getId(), $actual->getId());
+        static::assertGreaterThan(0, count($actual->getPlayerList()));
+        static::assertEquals($player->getId(), $actual->getPlayers()[count($actual->getPlayerList()) - 1]->getId());
     }
 
     private static function makeAssertions(League $expected, League $actual): void

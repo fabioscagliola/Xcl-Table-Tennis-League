@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\DataTransferObject\LeagueData;
 use App\Entity\League;
+use App\Entity\Player;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,9 +23,10 @@ class LeagueController extends AbstractController
      * @return JsonResponse
      */
     #[Route('/leagues', methods: ['POST'], format: 'json')]
-    public function Create(EntityManagerInterface $entityManager,
-        #[MapRequestPayload(acceptFormat: 'json', validationFailedStatusCode: Response::HTTP_BAD_REQUEST)] LeagueData $leagueData): JsonResponse
-    {
+    public function Create(
+        EntityManagerInterface $entityManager,
+        #[MapRequestPayload(acceptFormat: 'json', validationFailedStatusCode: Response::HTTP_BAD_REQUEST)] LeagueData $leagueData
+    ): JsonResponse {
         $league = new League();
         try {
             $league->initFromData($entityManager, $leagueData);
@@ -51,6 +53,7 @@ class LeagueController extends AbstractController
         if ($league === null) {
             return $this->json(null, Response::HTTP_NOT_FOUND);
         }
+        dump($league);
         return $this->json($league, Response::HTTP_OK);
     }
 
@@ -77,9 +80,11 @@ class LeagueController extends AbstractController
      * @return JsonResponse
      */
     #[Route('/leagues/{id}', methods: ['PUT'], format: 'json')]
-    public function Update(EntityManagerInterface $entityManager, int $id,
-        #[MapRequestPayload(acceptFormat: 'json', validationFailedStatusCode: Response::HTTP_BAD_REQUEST)] LeagueData $leagueData): JsonResponse
-    {
+    public function Update(
+        EntityManagerInterface $entityManager,
+        int $id,
+        #[MapRequestPayload(acceptFormat: 'json', validationFailedStatusCode: Response::HTTP_BAD_REQUEST)] LeagueData $leagueData
+    ): JsonResponse {
         $repository = $entityManager->getRepository(League::class);
         $league = $repository->find($id);
         if ($league === null) {
@@ -112,6 +117,35 @@ class LeagueController extends AbstractController
         }
         $entityManager->remove($league);
         $entityManager->flush();
+        return $this->json(null, Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * Assigns a player to a league.
+     *
+     * @param EntityManagerInterface $entityManager
+     * @param int $leagueId The identifier of the league.
+     * @param int $playerId The identifier of the player.
+     * @return JsonResponse
+     */
+    #[Route('/leagues/{leagueId}/players/{playerId}', methods: ['PUT'])]
+    public function AssignPlayer(EntityManagerInterface $entityManager, int $leagueId, int $playerId): JsonResponse
+    {
+        $leagueRepository = $entityManager->getRepository(League::class);
+        $league = $leagueRepository->find($leagueId);
+        if ($league === null) {
+            return $this->json('Invalid league identifier!', Response::HTTP_NOT_FOUND);
+        }
+        $playerRepository = $entityManager->getRepository(Player::class);
+        $player = $playerRepository->find($playerId);
+        if ($player === null) {
+            return $this->json('Invalid player identifier!', Response::HTTP_NOT_FOUND);
+        }
+        $league->addPlayer($player);
+        $entityManager->persist($league);
+        $entityManager->flush();
+        $league = $leagueRepository->find($leagueId);
+        dump($league);
         return $this->json(null, Response::HTTP_NO_CONTENT);
     }
 }

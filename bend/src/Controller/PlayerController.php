@@ -22,9 +22,10 @@ class PlayerController extends AbstractController
      * @return JsonResponse
      */
     #[Route('/players', methods: ['POST'], format: 'json')]
-    public function Create(EntityManagerInterface $entityManager,
-        #[MapRequestPayload(acceptFormat: 'json', validationFailedStatusCode: Response::HTTP_BAD_REQUEST)] PlayerData $playerData): JsonResponse
-    {
+    public function Create(
+        EntityManagerInterface $entityManager,
+        #[MapRequestPayload(acceptFormat: 'json', validationFailedStatusCode: Response::HTTP_BAD_REQUEST)] PlayerData $playerData
+    ): JsonResponse {
         $player = new Player();
         try {
             $player->initFromData($entityManager, $playerData);
@@ -77,9 +78,11 @@ class PlayerController extends AbstractController
      * @return JsonResponse
      */
     #[Route('/players/{id}', methods: ['PUT'], format: 'json')]
-    public function Update(EntityManagerInterface $entityManager, int $id,
-        #[MapRequestPayload(acceptFormat: 'json', validationFailedStatusCode: Response::HTTP_BAD_REQUEST)] PlayerData $playerData): JsonResponse
-    {
+    public function Update(
+        EntityManagerInterface $entityManager,
+        int $id,
+        #[MapRequestPayload(acceptFormat: 'json', validationFailedStatusCode: Response::HTTP_BAD_REQUEST)] PlayerData $playerData
+    ): JsonResponse {
         $repository = $entityManager->getRepository(Player::class);
         $player = $repository->find($id);
         if ($player === null) {

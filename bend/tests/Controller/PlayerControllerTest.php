@@ -64,7 +64,12 @@ class PlayerControllerTest extends ControllerTest
     {
         $data = static::CreatePlayerData();
         $expected = static::CreatePlayer($data);
-        $response = static::performRequest(static::$routeUrl . '/' . $expected->getId(), 'GET', null, Response::HTTP_OK);
+        $response = static::performRequest(
+            static::$routeUrl . '/' . $expected->getId(),
+            'GET',
+            null,
+            Response::HTTP_OK
+        );
         $actual = static::$serializer->deserialize($response->getContent(), Player::class, 'json');
         static::assertEquals($expected->getId(), $actual->getId());
         static::makeAssertions($expected, $actual);
@@ -115,7 +120,12 @@ class PlayerControllerTest extends ControllerTest
         $data = new PlayerData('Laura');
         $expected = new Player();
         $expected->initFromData(static::$entityManager, $data);
-        $response = static::performRequest(static::$routeUrl . '/' . $existing->getId(), 'PUT', $data, Response::HTTP_OK);
+        $response = static::performRequest(
+            static::$routeUrl . '/' . $existing->getId(),
+            'PUT',
+            $data,
+            Response::HTTP_OK
+        );
         $actual = static::$serializer->deserialize($response->getContent(), Player::class, 'json');
         static::assertEquals($existing->getId(), $actual->getId());
         static::makeAssertions($expected, $actual);

@@ -10,6 +10,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Ignore;
 
 #[ORM\Entity(repositoryClass: PlayerRepository::class)]
 class Player
@@ -25,6 +26,7 @@ class Player
     #[ORM\ManyToMany(targetEntity: Game::class, inversedBy: 'playerList')]
     private Collection $gameList;
 
+    #[Ignore]
     #[ORM\ManyToMany(targetEntity: League::class, mappedBy: 'playerList')]
     private Collection $leagueList;
 
