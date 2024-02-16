@@ -1,0 +1,30 @@
+volumes:
+  volume_mariadb:
+
+
+networks:
+  network_singleq:
+
+
+services:
+
+  database:
+    container_name: singleq-database
+    image: mariadb
+    environment:
+      - MARIADB_ROOT_PASSWORD=singleq
+    volumes:
+      - volume_mariadb:/var/lib/mysql
+    networks:
+      - network_singleq
+    ports:
+      - "65535:3306"
+
+  webapp:
+    container_name: singleq-webapp
+    build: .
+    networks:
+      - network_singleq
+    ports:
+      - "80:3000"
+
