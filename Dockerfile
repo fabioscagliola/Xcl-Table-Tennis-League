@@ -17,20 +17,20 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
     php -r "unlink('composer-setup.php');" && \
     mv composer.phar /usr/local/bin/composer
 
-WORKDIR /var/www/html/backend
-COPY ./backend /var/www/html/backend
-COPY ./.env.prod /var/www/html/backend/.env
+WORKDIR /var/www/html/bend
+COPY ./bend /var/www/html/bend
+COPY ./.env.prod /var/www/html/bend/.env
 RUN composer install
 
-WORKDIR /var/www/html/frontend
-COPY ./frontend /var/www/html/frontend
+WORKDIR /var/www/html/fend
+COPY ./fend /var/www/html/fend
 RUN npm install
 RUN npm run build
 
 COPY ./nginx.conf /etc/nginx/nginx.conf
 
-COPY singleq.sh /singleq.sh
-RUN chmod +x /singleq.sh
+COPY xttl.sh /xttl.sh
+RUN chmod +x /xttl.sh
 
-CMD ["/singleq.sh"]
+CMD ["/xttl.sh"]
 

@@ -8,7 +8,7 @@ The project is structured as follows.
 
 | Folder                      | Description                                                                                |
 |-----------------------------|--------------------------------------------------------------------------------------------|
-| bend/src/Controller         | The controllers exposing a set of RESTful API consumed by the frontend.                    |
+| bend/src/Controller         | The controllers exposing a set of REST API consumed by the frontend.                       |
 | bend/src/DataTransferObject | The classes used to serialize and deserialize data sent to and received from the frontend. |
 | bend/src/Entity             | The classes abstracting the data entities.                                                 |
 | bend/src/Repository         | The classes interacting with the database.                                                 |
@@ -20,51 +20,77 @@ The test environment is configured NOT to commit transactions, which means that 
 
 ## Getting started
 
-This section describes how to set up the containers and the development environment.
-
-### Containers
-
-Build the containers using the following command.
-
-```
-docker compose -p xttl build --no-cache
-```
+Clone the repo.
 
 Start the containers using the following command.
 
 ```
-docker compose -p xttl up -d --pull always --wait
+make up
 ```
 
-You should now be able to connect to MySQL using the following command.
-
-````
-docker exec -it xttl-database sh -c "mysql --user=root --password=xttl"
-````
-
-Eventually, you will be able to stop the containers using the following command.
+Create the test database and perform the migrations on both the development and the test databases using the following command.
 
 ```
-docker compose -p xttl down
+make init
 ```
 
-### Development environment setup
+When necessary, drop, recreate, and perform the migrations on both the development and the test databases using the following command.
 
-This section describes how to set up a development environment from scratch.
+```
+make reinit
+```
 
-#### Homebrew
+Execute all the tests using the following command.
+
+```
+make test
+```
+
+Connect to the shell of the backend container using the following command.
+
+```
+make bash-bend
+```
+
+Connect to the shell of the frontend container using the following command.
+
+```
+make bash-fend
+```
+
+Stop all the containers and remove orphans using the following command.
+
+```
+make down
+```
+
+Stop all the containers and remove orphans and volumes using the following command.
+
+```
+make down-vols
+```
+
+### Important
+
+The test environment is configured NOT to commit transactions, which means that tests do not actually alter the test database.
+
+## Local development environment setup
+
+This section describes how to set up the local development environment from scratch.
+
+### Homebrew
 
 ```
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-#### PHP
+### PHP
 
 ```
 brew install php
 ```
 
-#### Composer
+### Composer
 
 ```
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
@@ -74,68 +100,51 @@ php -r "unlink('composer-setup.php');"
 sudo mv composer.phar /usr/local/bin/composer
 ```
 
-#### Symfony
+Execute the following command from the `backend` folder to restore the packages.
+
+```
+composer install
+```
+
+### Symfony
 
 ```
 brew install symfony-cli/tap/symfony-cli
 ```
 
-#### Database
-
-Create the **development** database (based on the settings in the `.env` file), and execute the migrations.
-
-```
-php bin/console doctrine:database:create
-php bin/console doctrine:migrations:migrate
-```
-
-Drop the **development** database (based on the settings in the `.env` file), recreate it, and execute the migrations.
-
-```
-php bin/console doctrine:database:drop --force
-php bin/console doctrine:database:create
-php bin/console doctrine:migrations:migrate
-```
-
-Create the **test** database (based on the settings in the `.env.test` file), and execute the migrations.
-
-```
-php bin/console --env=test doctrine:database:create
-php bin/console --env=test doctrine:migrations:migrate
-```
-
-Drop the **test** database (based on the settings in the `.env.test` file), recreate it, and execute the migrations.
-
-```
-php bin/console --env=test doctrine:database:drop --force
-php bin/console --env=test doctrine:database:create
-php bin/console --env=test doctrine:migrations:migrate
-```
-
-#### PHPUnit
-
-Run all the tests.
-
-```
-php bin/phpunit
-```
-
-#### Integrate PHPUnit with IntelliJ IDEA
+### Integrate PHPUnit with IntelliJ IDEA
 
 The following screenshot shows the configuration of PHPUnit in IntelliJ IDEA.
 
 ![Integrate PHPUnit with IntelliJ IDEA](images/Integrate PHPUnit with IntelliJ IDEA.png)
 
-## How to
+### Next.js
 
-This section describes how to perform common tasks.
+```
+npm install next react react-dom
+```
 
-### Add a field to an entity
+## Execution
 
-When adding a field to an entity:
+Execute the following command from the `backend` folder to launch the backend.
 
-- Add a parameter to the constructor of the related data transfer object class
-- Initialize the field in the initFromData method of the entity class
-- Create a migration and apply it
-- Add integration tests as applicable
+```
+symfony server:start
+```
+
+Execute the following command from the `frontend` folder to launch the frontend.
+
+```
+npm run dev
+```
+
+In order to support the authentication/authorization flow, add the following entry to your `hosts` file – `/private/etc/hosts` on macOS.
+
+```
+127.0.0.1       xttl.local
+```
+
+Connect to the frontend using the following URL.
+
+http://xttl.local:3000
 

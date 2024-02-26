@@ -19,3 +19,12 @@ services:
       - network_xttl
     ports:
       - "65535:3306"
+
+  webapp:
+    container_name: xttl-webapp
+    build: .
+    networks:
+      - network_xttl
+    ports:
+      - "80:3000"
+
